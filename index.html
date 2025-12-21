@@ -1,587 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo to PDF Converter</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        /* ==================================== */
-        /* CSS STYLES (Modern & Minimalist) */
-        /* ==================================== */
-        :root {
-            --primary-blue: #007bff; /* Upload/Drop Zone color */
-            --primary-green: #28a745; /* Convert Button color */
-            --background-light: #f7f9fc;
-            --card-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-            --border-radius: 10px;
-        }
+  <meta charset="UTF-8" />
+  <title>YouTube Thumbnail Downloader</title>
+  <link rel="icon" type="image/png" href="mppss.webp">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--background-light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            width: 100%;
-            max-width: 900px;
-        }
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2em;
-            font-weight: 600;
-        }
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        /* --- File Drop/Upload Area --- */
-        #drop-zone {
-            border: 3px dashed var(--primary-blue);
-            border-radius: var(--border-radius);
-            padding: 50px 20px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            background-color: #eaf3ff;
-        }
+  <style>
+    :root{
+      --footer-height: 72px; /* change if you adjust footer padding */
+    }
+    html,body{
+      height:100%;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      scroll-behavior: smooth;
+      background: #f3f4f6;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        #drop-zone.hover {
-            background-color: #dbeaff;
-            border-color: #0056b3;
-            transform: translateY(-2px);
-        }
+    /* make sure main content doesn't go under fixed footer */
+    .page-wrapper {
+      padding-bottom: var(--footer-height);
+      width: 100%;
+    }
 
-        #drop-zone p {
-            color: #555;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-        }
+    /* Navbar */
+    nav {
+      background: #ffffff;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        #file-input {
-            display: none;
-        }
+    /* Popup (center) */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.98);
+      background: #111827;
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.4);
+      display: none;
+      z-index: 9999;
+      text-align: center;
+      animation: popupIn 250ms ease;
+      max-width: 90%;
+    }
+    @keyframes popupIn {
+      from { opacity: 0; transform: translate(-50%, -55%) scale(0.98); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
 
-        #drop-zone button {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
-        }
+    /* Loader bars */
+    .bars {
+      display:flex;
+      gap:6px;
+      align-items:center;
+      height:60px;
+      justify-content:center;
+    }
+    .bar {
+      width:6px;
+      background:#38bdf8;
+      border-radius:3px;
+      animation:pulse 1s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 0.1s);
+      transform-origin:center;
+    }
+    @keyframes pulse {
+      0%,100%{ height:10px; }
+      50%{ height:50px; }
+    }
 
-        #drop-zone button:hover {
-            background-color: #0056b3;
-        }
+    /* Main container (centered card) */
+    .card {
+      max-width: 520px;
+      margin: 110px auto 24px; /* leave space for fixed navbar */
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 30px rgba(2,6,23,0.06);
+      text-align: center;
+    }
 
-        /* --- Image Preview Area --- */
-        #preview-header {
-            color: #555;
-            font-weight: 600;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            display: none;
-        }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
 
-        #image-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding-bottom: 20px;
-            min-height: 50px;
-        }
+    .btn-download {
+      display: inline-block;
+      width: 100%;
+      background: #ec4899; /* pink-500 */
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+    }
 
-        .thumbnail {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            border: 3px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-            cursor: grab;
-            transition: transform 0.1s;
-        }
+    /* Fixed footer bottom center */
+    footer.fixed-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--footer-height);
+      background: #0f172a; /* gray-900 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      padding: 12px 16px;
+      box-shadow: 0 -4px 20px rgba(2,6,23,0.12);
+    }
 
-        .thumbnail:hover {
-            transform: scale(1.02);
-        }
+    footer .footer-inner {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #c7d2fe; /* light indigo-ish */
+      font-size: 14px;
+    }
 
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    footer .footer-inner a {
+      color: #a78bfa; /* indigo-300 */
+      text-decoration: none;
+      font-weight: 600;
+    }
 
-        .remove-btn {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #dc3545;
-            color: white;
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            line-height: 21px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-            padding: 0;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.2s;
-        }
+    /* responsive tweaks */
+    @media (min-width: 640px) {
+      footer .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
 
-        .remove-btn:hover {
-            background-color: #c82333;
-        }
-
-        /* --- Controls/Settings --- */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 20px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-
-        .settings-group {
-            display: flex;
-            gap: 20px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .control-group label {
-            font-size: 0.9em;
-            margin-bottom: 6px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        select {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background-color: white;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        /* --- Convert Button --- */
-        #convert-btn {
-            padding: 14px 35px;
-            background-color: var(--primary-green);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
-            min-width: 200px;
-        }
-
-        #convert-btn:hover:not(:disabled) {
-            background-color: #1e7e34;
-            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.5);
-        }
-
-        #convert-btn:disabled {
-            background-color: #9cbb9e;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* --- Responsive Adjustments --- */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .settings-group {
-                flex-direction: column;
-                gap: 15px;
-                margin-bottom: 20px;
-            }
-
-            #convert-btn {
-                width: 100%;
-                min-width: auto;
-            }
-        }
-    </style>
+    /* small helper for spacing below fixed header */
+    .header-spacer { height: 64px; }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>📸 Photo to PDF Converter</h1>
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-inner">
+      <div class="logo" style="font-weight:700; font-size:18px; color:#4f46e5;">
+        Pro <span style="color:#111827; font-weight:700;">Developing.</span>
+      </div>
 
-        <div id="drop-zone">
-            <p>Drag & Drop your photos here, or click to select files.</p>
-            <button onclick="document.getElementById('file-input').click()">Select Images</button>
-            <input type="file" id="file-input" accept="image/jpeg, image/png, image/heic" multiple>
-        </div>
-
-        <p id="preview-header">Images (Drag to Reorder):</p>
-        <div id="image-preview">
-            </div>
-
-        <div class="controls">
-            <div class="settings-group">
-                <div class="control-group">
-                    <label for="page-size">Page Size:</label>
-                    <select id="page-size">
-                        <option value="a4">A4 (Portrait)</option>
-                        <option value="letter">Letter (Portrait)</option>
-                        <option value="fit">Fit to Image</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="orientation">Orientation:</label>
-                    <select id="orientation">
-                        <option value="p">Portrait</option>
-                        <option value="l">Landscape</option>
-                    </select>
-                </div>
-            </div>
-
-            <button id="convert-btn" disabled>Convert & Download PDF</button>
-        </div>
+      <!-- WhatsApp icon on right (replace number if needed) -->
+      <div>
+        <a href="https://wa.me/916356952788?text=Hello%20MS%20Developing!%20👋" target="_blank"
+           style="color:#16a34a; font-size:22px; text-decoration:none;">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+      </div>
     </div>
+  </nav>
 
-    <script>
-        /* ==================================== */
-        /* JAVASCRIPT LOGIC */
-        /* ==================================== */
+  <div class="page-wrapper">
+    <div class="header-spacer"></div>
 
-        // Store file data (id, name, dataUrl) for conversion
-        let fileData = [];
+    <!-- MAIN CARD -->
+    <div class="card">
+      <h1 style="font-size:18px; font-weight:700; margin-bottom:10px;">Download YouTube Thumbnail</h1>
 
-        // DOM Elements
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const imagePreview = document.getElementById('image-preview');
-        const convertBtn = document.getElementById('convert-btn');
-        const pageSizeSelect = document.getElementById('page-size');
-        const orientationSelect = document.getElementById('orientation');
-        const previewHeader = document.getElementById('preview-header');
+      <input type="text" id="videoUrl" placeholder="Enter YouTube video URL" />
+      <select id="quality">
+        <option value="maxresdefault">Max Quality</option>
+        <option value="hqdefault">High Quality</option>
+        <option value="mqdefault">Medium Quality</option>
+        <option value="default">Low Quality</option>
+      </select> <br>
 
-        // --- Helper Function: Update Button/Header State ---
-        const updateButtonState = () => {
-            convertBtn.disabled = fileData.length === 0;
-            previewHeader.style.display = fileData.length > 0 ? 'block' : 'none';
-        };
+     <br> <button class="btn-download" onclick="downloadThumbnail()">Download</button>
 
-        // --- Handle File Processing (Image to DataURL) ---
-        const processFiles = (files) => {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                // Only process image files
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        // Store the file and its data URL
-                        const newFile = {
-                            id: Date.now() + Math.random(), // Unique ID for reordering
-                            name: file.name,
-                            dataUrl: e.target.result,
-                        };
-                        fileData.push(newFile);
-                        renderPreview(newFile);
-                        updateButtonState();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        };
+      <!-- Loader -->
+      <div id="loader" class="bars" style="margin-top:14px; display:none;">
+        <div class="bar" style="--i:1"></div>
+        <div class="bar" style="--i:2"></div>
+        <div class="bar" style="--i:3"></div>
+        <div class="bar" style="--i:4"></div>
+        <div class="bar" style="--i:5"></div>
+        <div class="bar" style="--i:6"></div>
+        <div class="bar" style="--i:7"></div>
+        <div class="bar" style="--i:8"></div>
+        <div class="bar" style="--i:9"></div>
+      </div>
+    </div>
+  </div>
 
-        // --- File Upload Event ---
-        fileInput.addEventListener('change', (e) => {
-            processFiles(e.target.files);
-            e.target.value = ''; // Clear input for selecting same files again
-        });
+  <!-- Center Popup -->
+  <div class="popup" id="popup"></div>
 
-        // --- Drag and Drop Handlers ---
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
+  <!-- FIXED FOOTER (bottom center) -->
+  <footer class="fixed-footer" role="contentinfo" aria-label="Footer">
+    <div class="footer-inner">
+      <div style="display:flex; align-items:center; gap:10px;">
+      </div>
+      <div style="color:#cbd5e1;">©Power by <a href="https://mpdeveloping.github.io/mpwebsite/" target="_blank">Pro Developing.</a></div>
+    </div>
+  </footer>
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+  <script>
+    function showPopup(message) {
+      const popup = document.getElementById('popup');
+      popup.textContent = message;
+      popup.style.display = 'block';
+      // auto hide after 2.5s
+      clearTimeout(popup._hideTimeout);
+      popup._hideTimeout = setTimeout(() => {
+        popup.style.display = 'none';
+      }, 2500);
+    }
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('hover'), false);
-        });
+    function extractVideoID(url) {
+      const regExp = /^.*(?:youtu.be\/|v\/|embed\/|watch\?v=|watch\?.+&v=)([^#&?]{11}).*/;
+      const match = url.match(regExp);
+      return match ? match[1] : null;
+    }
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('hover'), false);
-        });
+    async function downloadThumbnail() {
+      const loader = document.getElementById('loader');
+      const url = document.getElementById('videoUrl').value.trim();
+      const quality = document.getElementById('quality').value;
 
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            processFiles(files);
-        }, false);
+      if (!url) {
+        return showPopup('⚠️ Please enter a YouTube URL first!');
+      }
 
-        // --- Render Image Thumbnail ---
-        const renderPreview = (file) => {
-            const div = document.createElement('div');
-            div.className = 'thumbnail';
-            div.setAttribute('draggable', true);
-            div.dataset.id = file.id;
+      const videoId = extractVideoID(url);
+      if (!videoId) {
+        return showPopup('⚠️ Invalid YouTube URL');
+      }
 
-            const img = document.createElement('img');
-            img.src = file.dataUrl;
-            img.alt = file.name;
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-btn';
-            removeBtn.textContent = '×';
-            removeBtn.title = 'Remove image';
-            // Use an arrow function to preserve 'this' and pass the file ID
-            removeBtn.onclick = () => removeImage(file.id);
-
-            div.appendChild(img);
-            div.appendChild(removeBtn);
-            imagePreview.appendChild(div);
-
-            // Add drag/drop listeners for reordering
-            addDragListeners(div);
-        };
-
-        // --- Remove Image ---
-        const removeImage = (id) => {
-            fileData = fileData.filter(file => file.id !== id);
-            const element = document.querySelector(`.thumbnail[data-id="${id}"]`);
-            if (element) {
-                element.remove();
-            }
-            updateButtonState();
-        };
-
-        // --- Drag Reordering Logic ---
-        let dragSrcEl = null;
-
-        function addDragListeners(el) {
-            el.addEventListener('dragstart', handleDragStart, false);
-            el.addEventListener('dragover', handleDragOver, false);
-            el.addEventListener('drop', handleDrop, false);
-            el.addEventListener('dragend', handleDragEnd, false);
-        }
-
-        function handleDragStart(e) {
-            this.style.opacity = '0.4';
-            dragSrcEl = this;
-            e.dataTransfer.effectAllowed = 'move';
-            // Set data to be transferred
-            e.dataTransfer.setData('text/plain', this.dataset.id); 
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDrop(e) {
-            e.stopPropagation();
-
-            if (dragSrcEl !== this) {
-                const draggedId = dragSrcEl.dataset.id;
-                const targetId = this.dataset.id;
-
-                // --- 1. Swap Visual Position ---
-                // We use cloneNode(true) to ensure all event listeners (like removeBtn.onclick) are preserved
-                const draggedClone = dragSrcEl.cloneNode(true);
-                const targetClone = this.cloneNode(true);
-                
-                // Need to remove old listeners and add new ones to clones
-                dragSrcEl.parentNode.replaceChild(targetClone, dragSrcEl);
-                this.parentNode.replaceChild(draggedClone, this);
-
-                // Re-add event listeners to the new cloned elements
-                addDragListeners(draggedClone);
-                addDragListeners(targetClone);
-                
-                // Re-wire remove buttons on clones (important as cloneNode loses the listener)
-                draggedClone.querySelector('.remove-btn').onclick = () => removeImage(draggedClone.dataset.id);
-                targetClone.querySelector('.remove-btn').onclick = () => removeImage(targetClone.dataset.id);
-
-                // --- 2. Update the Logical Array (fileData) Order ---
-                const draggedIndex = fileData.findIndex(f => f.id == draggedId);
-                const targetIndex = fileData.findIndex(f => f.id == targetId);
-                
-                // Perform the array swap using destructuring assignment
-                [fileData[draggedIndex], fileData[targetIndex]] = [fileData[targetIndex], fileData[draggedIndex]];
-            }
-
-            return false;
-        }
-
-        function handleDragEnd(e) {
-            this.style.opacity = '1';
-        }
-        
-        // --- Settings Event Listener ---
-        pageSizeSelect.addEventListener('change', () => {
-            // Disable orientation selector if 'Fit to Image' is selected
-            orientationSelect.disabled = pageSizeSelect.value === 'fit';
-            if (orientationSelect.disabled) {
-                orientationSelect.value = 'p'; // Default to portrait
-            }
-        });
-
-        // --- Main Conversion Function ---
-        convertBtn.addEventListener('click', async () => {
-            if (fileData.length === 0 || convertBtn.disabled) return;
-            
-            convertBtn.textContent = 'Processing...';
-            convertBtn.disabled = true;
-
-            const pageSize = pageSizeSelect.value;
-            const orientation = orientationSelect.value;
-            
-            // Standard A4 dimensions in Points (pt: 1/72 inch)
-            const A4_WIDTH = 595.28; 
-            const A4_HEIGHT = 841.89; 
-            const LETTER_WIDTH = 612;
-            const LETTER_HEIGHT = 792;
-            
-            let pdfWidth, pdfHeight;
-            
-            if (pageSize === 'letter') {
-                pdfWidth = LETTER_WIDTH;
-                pdfHeight = LETTER_HEIGHT;
-            } else { // 'a4' or 'fit' (use A4 as default starting format)
-                pdfWidth = A4_WIDTH;
-                pdfHeight = A4_HEIGHT;
-            }
-
-            // Apply orientation swap if not 'fit'
-            if (pageSize !== 'fit' && orientation === 'l') {
-                [pdfWidth, pdfHeight] = [pdfHeight, pdfWidth]; 
-            }
-            
-            // Initialize jsPDF
-            const pdf = new window.jspdf.jsPDF({
-                orientation: pageSize !== 'fit' ? orientation : 'p', 
-                unit: 'pt',
-                format: [pdfWidth, pdfHeight] 
-            });
-
-            // Loop through the ordered fileData
-            for (let i = 0; i < fileData.length; i++) {
-                const imgData = fileData[i].dataUrl;
-                
-                // Create a temporary Image object to get natural dimensions
-                const img = new Image();
-                img.src = imgData;
-                
-                // Use a promise to wait for the image to load
-                await new Promise(resolve => img.onload = resolve); 
-
-                const imgWidth = img.naturalWidth;
-                const imgHeight = img.naturalHeight;
-                const imgRatio = imgWidth / imgHeight;
-
-                let finalWidth, finalHeight;
-                let pageW = pdfWidth;
-                let pageH = pdfHeight;
-                
-                // Add new page for all images after the first one
-                if (i > 0) {
-                    pdf.addPage();
-                }
-
-                if (pageSize === 'fit') {
-                    // --- MODE: Fit to Image ---
-                    // jsPDF expects dimensions in points (72 DPI is common, 96 DPI is browser default)
-                    const DPI_SCALE = 72 / 96; 
-                    pageW = imgWidth * DPI_SCALE;
-                    pageH = imgHeight * DPI_SCALE;
-                    
-                    finalWidth = pageW;
-                    finalHeight = pageH;
-                    
-                    // Dynamically set the page size for this specific page
-                    pdf.setPage(pdf.internal.pages.length); 
-                    pdf.internal.pageSize.width = pageW;
-                    pdf.internal.pageSize.height = pageH;
-                    
-                    // Add image to PDF at (0, 0)
-                    pdf.addImage(imgData, 'JPEG', 0, 0, finalWidth, finalHeight);
-
-                } else {
-                    // --- MODE: A4/Letter (Fit image inside the fixed page size) ---
-                    
-                    let availableWidth = pageW * 0.95; // 5% padding
-                    let availableHeight = pageH * 0.95; 
-                    
-                    // Calculate image dimensions to fit within the page (maintaining aspect ratio)
-                    if (imgRatio > availableWidth / availableHeight) {
-                        // Image is wider than the page, constrain by width
-                        finalWidth = availableWidth;
-                        finalHeight = finalWidth / imgRatio;
-                    } else {
-                        // Image is taller than the page, constrain by height
-                        finalHeight = availableHeight;
-                        finalWidth = finalHeight * imgRatio;
-                    }
-                    
-                    // Center the image on the page
-                    const x = (pageW - finalWidth) / 2;
-                    const y = (pageH - finalHeight) / 2;
-                    
-                    // Add image to PDF
-                    pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
-                }
-            }
-            
-            // Save the PDF
-            pdf.save('photos_to_pdf.pdf');
-            
-        // Reset button text
-            convertBtn.textContent = 'Convert & Download PDF';
-            updateButtonState();
-        });
-        
-        // Initial setup
-        updateButtonState();
-
-    </script>
+      loader.style.display = 'flex';
+      try {
+        const imageUrl = `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error('Not found');
+        const blob = await response.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${videoId}_${quality}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+        showPopup('✅ Thumbnail downloaded successfully!');
+      } catch (err) {
+        showPopup('❌ Download failed.');
+      } finally {
+        loader.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 </html>
