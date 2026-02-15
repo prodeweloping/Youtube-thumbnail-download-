@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>YouTube Thumbnail Downloader</title>
+  <title>YT Thumbnail · Pro Developing</title>
   <link rel="icon" type="image/png" href="Pro.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -13,12 +13,12 @@
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts (Inter) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --footer-height: 72px; /* change if you adjust footer padding */
+      --footer-height: 70px;
     }
     html,body{
       height:100%;
@@ -33,29 +33,50 @@
       min-height: 100vh;
     }
 
-    /* make sure main content doesn't go under fixed footer */
-    .page-wrapper {
-      padding-bottom: var(--footer-height);
-      width: 100%;
-    }
-
-    /* Navbar */
-    nav {
-      background: #ffffff;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    /* ✅ NEW NAVBAR (blue+orange logo + whatsapp) */
+    .new-nav {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      z-index: 40;
-    }
-    .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 12px 16px;
+      z-index: 50;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.02);
+      padding: 0.6rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+    .logo-blue {
+      color: #007BFF;
+      font-weight: 800;
+      font-size: 1.9rem;
+      letter-spacing: -0.5px;
+    }
+    .logo-orange {
+      color: #FF6F00;
+      font-weight: 800;
+      font-size: 1.9rem;
+      letter-spacing: -0.5px;
+    }
+    .whatsapp-nav {
+      background-color: #25D366;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+      box-shadow: 0 6px 12px rgba(37,211,102,0.2);
+      text-decoration: none;
+    }
+    .whatsapp-nav:hover {
+      transform: scale(1.12);
+      box-shadow: 0 10px 18px rgba(37,211,102,0.35);
     }
 
     /* Popup (center) */
@@ -101,109 +122,103 @@
       50%{ height:50px; }
     }
 
-    /* Main container (centered card) */
+    /* Main container (centered card) with spacing for fixed navbar */
     .card {
       max-width: 520px;
       margin: 110px auto 24px; /* leave space for fixed navbar */
       background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 30px rgba(2,6,23,0.06);
+      padding: 24px 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.08);
       text-align: center;
     }
 
     input[type="text"], select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 12px 14px;
       border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 14px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: #007BFF;
     }
 
-    .btn-download {
+    /* ✅ NEW GRADIENT BUTTON (blue🟠orange) */
+    .btn-gradient {
       display: inline-block;
       width: 100%;
-      background: #ec4899; /* pink-500 */
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 8px;
+      background: linear-gradient(145deg, #007BFF, #FF6F00);
+      background-size: 150% auto;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 60px;
       border: none;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 8px 18px rgba(0, 123, 255, 0.25);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .btn-gradient:hover {
+      background-position: right center;
+      transform: translateY(-4px);
+      box-shadow: 0 16px 26px rgba(255, 111, 0, 0.3);
     }
 
-    /* Fixed footer bottom center */
+    /* ✅ FOOTER: fixed bottom, exactly "Design by Pro Developing" (yellow) */
     footer.fixed-footer {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
       height: var(--footer-height);
-      background: #0f172a; /* gray-900 */
+      background: #0f172a; /* deep dark */
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 30;
-      padding: 12px 16px;
+      padding: 0 16px;
       box-shadow: 0 -4px 20px rgba(2,6,23,0.12);
     }
-
-    footer .footer-inner {
-      max-width: 1100px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      color: #c7d2fe; /* light indigo-ish */
-      font-size: 14px;
+    .design-footer {
+      color: #94a3b8; /* soft gray */
+      font-size: 1rem;
+      font-weight: 400;
+    }
+    .design-footer .yellow-highlight {
+      color: #fbbf24; /* vibrant yellow */
+      font-weight: 700;
     }
 
-    footer .footer-inner a {
-      color: #a78bfa; /* indigo-300 */
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    /* responsive tweaks */
-    @media (min-width: 640px) {
-      footer .footer-inner {
-        flex-direction: row;
-        justify-content: space-between;
-      }
-    }
-
-    /* small helper for spacing below fixed header */
+    /* small helper */
     .header-spacer { height: 64px; }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav>
-    <div class="nav-inner">
-      <div class="logo" style="font-weight:700; font-size:18px; color:#4f46e5;">
-        Pro <span style="color:#111827; font-weight:700;">Developing.</span>
-      </div>
-
-      <!-- WhatsApp icon on right (replace number if needed) -->
-      <div>
-        <a href="https://wa.me/916356952788?text=Hello%20MS%20Developing!%20👋" target="_blank"
-           style="color:#16a34a; font-size:22px; text-decoration:none;">
-          <i class="fa-brands fa-whatsapp"></i>
-        </a>
-      </div>
+  <!-- ✅ NEW NAVBAR (Pro blue + Developing orange) with WhatsApp icon -->
+  <nav class="new-nav">
+    <div class="flex items-center">
+      <span class="logo-blue">Pro</span>
+      <span class="logo-orange">Developing</span>
     </div>
+    <a id="waTop" class="whatsapp-nav" href="#" title="Chat on WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
   </nav>
 
-  <div class="page-wrapper">
+  <!-- page wrapper to ensure footer spacing (no extra padding needed, footer fixed) -->
+  <div style="padding-bottom: var(--footer-height); width:100%;">
     <div class="header-spacer"></div>
 
     <!-- MAIN CARD -->
     <div class="card">
-      <h1 style="font-size:18px; font-weight:700; margin-bottom:10px;">Download YouTube Thumbnail</h1>
+      <h1 class="text-xl font-bold mb-3" style="color:#1e293b;">Download YouTube Thumbnail</h1>
 
       <input type="text" id="videoUrl" placeholder="Enter YouTube video URL" />
       <select id="quality">
@@ -211,12 +226,13 @@
         <option value="hqdefault">High Quality</option>
         <option value="mqdefault">Medium Quality</option>
         <option value="default">Low Quality</option>
-      </select> <br>
+      </select> 
 
-     <br> <button class="btn-download" onclick="downloadThumbnail()">Download</button>
+      <!-- ✅ GRADIENT BUTTON (replaced old pink) -->
+      <button class="btn-gradient" onclick="downloadThumbnail()">Download</button>
 
-      <!-- Loader -->
-      <div id="loader" class="bars" style="margin-top:14px; display:none;">
+      <!-- Loader (unchanged) -->
+      <div id="loader" class="bars" style="margin-top:16px; display:none;">
         <div class="bar" style="--i:1"></div>
         <div class="bar" style="--i:2"></div>
         <div class="bar" style="--i:3"></div>
@@ -230,24 +246,50 @@
     </div>
   </div>
 
-  <!-- Center Popup -->
+  <!-- Center Popup (same) -->
   <div class="popup" id="popup"></div>
 
-  <!-- FIXED FOOTER (bottom center) -->
-  <footer class="fixed-footer" role="contentinfo" aria-label="Footer">
-    <div class="footer-inner">
-      <div style="display:flex; align-items:center; gap:10px;">
-      </div>
-      <div style="color:#cbd5e1;">©Power by <a href="https://www.prodeveloping.online/" target="_blank">Pro Developing.</a></div>
-    </div>
-  </footer>
+  <!-- ✅ NEW FOOTER: exactly "Design by Pro Developing" with yellow -->
+<footer class="fixed-footer">
+  <div class="design-footer">
+    Design by 
+    <a href="https://www.prodeveloping.online" 
+       target="_blank" 
+       class="yellow-highlight" 
+       style="text-decoration:none;">
+       Pro Developing
+    </a>
+  </div>
+</footer>
+
+  <!-- Floating WhatsApp (optional but we keep same style as navbar) 
+       we'll also add a floating one for consistency, positioned above footer -->
+  <a id="waFloating" class="whatsapp-nav beat" href="#" style="position:fixed; right:16px; bottom: calc(var(--footer-height) + 16px); z-index:45; width:56px; height:56px; font-size:2rem;" title="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
 
   <script>
+    // WhatsApp number and message (same as before)
+    const waNumber = '916356952788';
+    const waMessage = encodeURIComponent('Hello! I am using your YouTube Thumbnail Downloader 😊');
+
+    function setupWhatsApp(linkId) {
+      const el = document.getElementById(linkId);
+      if (el) {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.open(`https://wa.me/${waNumber}?text=${waMessage}`, '_blank');
+        });
+      }
+    }
+    setupWhatsApp('waTop');
+    setupWhatsApp('waFloating');
+
+    // popup function
     function showPopup(message) {
       const popup = document.getElementById('popup');
       popup.textContent = message;
       popup.style.display = 'block';
-      // auto hide after 2.5s
       clearTimeout(popup._hideTimeout);
       popup._hideTimeout = setTimeout(() => {
         popup.style.display = 'none';
@@ -297,4 +339,4 @@
     }
   </script>
 </body>
-</html>
+    </html>
